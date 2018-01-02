@@ -35,6 +35,28 @@ def get_categories(df):
     cat.add('General')
     return cat
 
+def get_athletes(df):
+    """
+    
+    :return: 
+    """
+    athletes_list = []
+    for idx, row in df.iterrows():
+
+        if row['Sexo'] == 'Masculino':
+            gender = 'M'
+        elif row ['Sexo'] == 'Femenino':
+            gender = 'F'
+        else:
+            gender = 'O'
+        athletes_list.append({'first_name': row['Nombre'],
+               'last_name': row['Apellido'],
+               'gender': gender,
+               'age': int(row['Edad'])
+               })
+    return athletes_list
+
+
 def get_sorted_by_categories(df, podium_len=5):
     """
     Returns a dictionary with the sorted series of each 

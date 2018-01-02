@@ -27,6 +27,7 @@ def categories(apps, schema_editor):
             cat = Category.objects.create(description='General', low_age=0, high_age=120)
         cat.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
