@@ -31,11 +31,6 @@ class TimeRecord(models.Model):
     def __str__(self):
          return 'Results for {}, at {}'.format(self.result_athlete, self.result_race)
 
-class Registered_Athlete(models.Model):
-    """
-    Once an athlete is registered, there
-    """
-    ath_id = models.IntegerField
 class Category(models.Model):
 
     description = models.CharField(max_length=200, unique=True)
@@ -45,6 +40,7 @@ class Category(models.Model):
     def __str__(self):
         return self.description
 
+
 class Race(models.Model):
 
     name = models.CharField(max_length=200, unique=True)
@@ -52,9 +48,20 @@ class Race(models.Model):
     date = models.DateField(default = timezone.datetime.today)
     init_time = models.DateTimeField(null=True, blank=True)
     length = models.IntegerField(default=1000)
-    available_categories = models.ManyToManyField(to=Registered_Athlete)
-    reg_athletes = models.ManyToManyField(to=Athlete)
+    available_categories = models.ManyToManyField(to=Category)
+
 
     def __str__(self):
         return self.name
 
+class Registered_Athlete(models.Model):
+    """
+    Once an athlete is registered, it has a category assigned.
+    """
+    reg_id = models.IntegerField(primary_key=True)
+    athlete = models.ForeignKey(to=Athlete, on_delete=models.CASCADE)
+    race = models.ForeignKey(to=Race, on_delete=models.CASCADE)
+    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.athlete.name
