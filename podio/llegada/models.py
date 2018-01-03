@@ -23,7 +23,6 @@ class TimeRecord(models.Model):
     """
     TimeRecord for each race for a given athlete
     """
-    r_id = models.IntegerField(primary_key=True, )
     result_athlete = models.ForeignKey('Athlete', on_delete=models.CASCADE)
     result_race = models.ForeignKey('Race', on_delete=models.CASCADE)
     time_record = models.DurationField(default=td(seconds=0))
@@ -48,20 +47,33 @@ class Race(models.Model):
     date = models.DateField(default = timezone.datetime.today)
     init_time = models.DateTimeField(null=True, blank=True)
     length = models.IntegerField(default=1000)
-    available_categories = models.ManyToManyField(to=Category)
-
+    available_categories = models.ManyToManyField(to=Category, )
+    results = models.ManyToManyField(to=TimeRecord)
+    ended = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
+    def end_race(self):
+        self.ended = True
+
+    def resume_race(self):
+        self.ended = False
+
+    def get_results(self):
+        if not self.ended:
+            raise AttributeError('Race has not ended')
+
+
 
 class Registered_Athlete(models.Model):
     """
     Once an athlete is registered, it has a category assigned.
     """
     reg_id = models.IntegerField(primary_key=True)
-    athlete = models.ForeignKey(to=Athlete, on_delete=models.CASCADE)
+    athlete = models.OneToOneField(to=Athlete, on_delete=models.CASCADE)
     race = models.ForeignKey(to=Race, on_delete=models.CASCADE)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.athlete.name
+        return 'Inscripto: {}, {}'.format(self.athlete.last_name, self.athlete.first_name)
