@@ -31,13 +31,19 @@ class TimeRecord(models.Model):
          return 'Results for {}, at {}'.format(self.result_athlete, self.result_race)
 
 class Category(models.Model):
-
-    description = models.CharField(max_length=200, unique=True)
+    GENDER = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('C', 'Children'),
+        ('O', 'Other')
+    )
+    description = models.CharField(max_length=200)
+    gender = models.CharField(max_length=1, choices=GENDER, default='F')
     low_age = models.IntegerField()
     high_age = models.IntegerField()
 
     def __str__(self):
-        return self.description
+        return "{} - {}".format(self.description, self.gender)
 
 
 class Race(models.Model):
@@ -48,7 +54,6 @@ class Race(models.Model):
     init_time = models.DateTimeField(null=True, blank=True)
     length = models.IntegerField(default=1000)
     available_categories = models.ManyToManyField(to=Category, )
-    results = models.ManyToManyField(to=TimeRecord)
     ended = models.BooleanField(default=False)
 
     def __str__(self):
@@ -76,4 +81,5 @@ class Registered_Athlete(models.Model):
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
 
     def __str__(self):
-        return 'Inscripto: {}, {}'.format(self.athlete.last_name, self.athlete.first_name)
+        return 'Inscripto: {}, {} en la Carrera {}'.format(self.athlete.last_name,
+                                                           self.athlete.first_name, self.race.name)

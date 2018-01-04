@@ -4,11 +4,17 @@ from datetime import date, datetime
 from django.db import migrations
 import llegada.handler.handler as hd
 
+
+
 def athletes(apps, schema_editor):
     df = hd.init_dataframe()
 
     list_athletes = hd.get_athletes(df)
     athlete_model = apps.get_model('llegada', 'Athlete')
+    result_model = apps.get_model('llegada', 'TimeRecord')
+    race_model = apps.get_model('llegada', 'Race')
+    race_obj = race_model.objects.get(id=1)
+
     for ath in list_athletes:
         ath_obj = athlete_model.objects.create(first_name = ath['first_name'],
                                                last_name=ath['last_name'],
@@ -16,6 +22,13 @@ def athletes(apps, schema_editor):
                                                age = ath['age']
                                                )
         ath_obj.save()
+
+        result_obj = result_model.objects.create(result_athlete = ath_obj,
+                                                 result_race = race_obj,
+                                                 time_record = ath['result'])
+        print (result_obj)
+        result_obj.save()
+
 def init_race(apps, schema_editor):
 
     race_model = apps.get_model('llegada', 'Race')
@@ -41,6 +54,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-                   migrations.RunPython(athletes),
                    migrations.RunPython(init_race),
+                   migrations.RunPython(athletes),
     ]

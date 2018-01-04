@@ -19,13 +19,20 @@ def categories(apps, schema_editor):
         menores_cat = re.match(r'Hasta\s(\d*)', cat)
         general_cat = re.match(r'General', cat)
 
+
         if same_cat:
-            cat = Category.objects.create(description=same_cat.group(1), low_age=int(same_cat.group(2)), high_age=int(same_cat.group(3)))
+            cat = Category.objects.create(description=same_cat.group(1), gender='M', low_age=int(same_cat.group(2)),
+                                          high_age=int(same_cat.group(3)))
+            cat.save()
+            cat = Category.objects.create(description=same_cat.group(1), gender='F', low_age=int(same_cat.group(2)),
+                              high_age=int(same_cat.group(3)))
+            cat.save()
         elif menores_cat:
-            cat = Category.objects.create(description='Menores', low_age=0, high_age=int(menores_cat.group(1)))
+            cat = Category.objects.create(description='Menores', gender='C', low_age=0, high_age=int(menores_cat.group(1)))
+            cat.save()
         elif general_cat:
-            cat = Category.objects.create(description='General', low_age=0, high_age=120)
-        cat.save()
+            cat = Category.objects.create(description='General', gender='O', low_age=0, high_age=120)
+            cat.save()
 
 
 class Migration(migrations.Migration):

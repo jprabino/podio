@@ -3,6 +3,7 @@ Module to load and sort the results table
 """
 import pandas as pd
 import datetime as dt
+import re
 
 def init_dataframe(file_path = None):
 
@@ -41,6 +42,7 @@ def get_athletes(df):
     :return: 
     """
     athletes_list = []
+
     for idx, row in df.iterrows():
 
         if row['Sexo'] == 'Masculino':
@@ -49,10 +51,13 @@ def get_athletes(df):
             gender = 'F'
         else:
             gender = 'O'
+        h, m, s = re.match(r'(\d{2}):(\d{2}):(\d{2})', row['Tiempo']).groups()
+
         athletes_list.append({'first_name': row['Nombre'],
                'last_name': row['Apellido'],
                'gender': gender,
-               'age': int(row['Edad'])
+               'age': int(row['Edad']),
+               'result': dt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
                })
     return athletes_list
 
