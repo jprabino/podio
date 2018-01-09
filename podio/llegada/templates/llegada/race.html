@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrera {{ race.name  }}</title>
+</head>
+<body>
+    <h1> Nadadores Registrados </h1>
+    <ol>
+        {% for ath in reg_athletes %}
+        <li> {{ ath }}</li>
+        {% endfor %}
+    </ol>
+</body>
+</html>
