@@ -42,5 +42,5 @@ def results_per_category(request, race_id, category_id):
 
     time_records = TimeRecord.objects.filter(result_athlete__in=reg_athletes)
 
-    return render(request, 'llegada/results.html',{'results':time_records})
+    return render(request, 'llegada/results.html',{'results':time_records, 'category': category_obj})
 

@@ -3,9 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Results for Race {{ race.name }}</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
 </head>
 <body>
-    <table>
+    <h3>Results for Category: {{ category }} </h3>
+    <table style="width:100%">
         <tr>
             <th scope="col">Name</th>
             <th scope="col">Position</th>
@@ -18,7 +36,6 @@
             <td> {{ r.time_record }} </td>
         </tr>
             {% endfor %}
-
     </table>
 
 </body>

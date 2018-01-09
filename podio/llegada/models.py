@@ -42,7 +42,7 @@ class Category(models.Model):
     high_age = models.IntegerField()
 
     def __str__(self):
-        return "{} - {}".format(self.description, self.gender)
+        return "{} - {}".format(self.description, self.get_gender_display())
 
 
 class Race(models.Model):
