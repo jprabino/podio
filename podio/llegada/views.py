@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 
-from .models import Registered_Athlete, Race, Category
+from .models import Registered_Athlete, Race, Category, TimeRecord
 # Create your views here.
 
 
@@ -36,7 +36,11 @@ def results_per_category(request, race_id, category_id):
     category_obj = get_object_or_404(Category, id=category_id)
 
     reg_athletes = Registered_Athlete.objects.filter(race=race_obj, category=category_obj)
+
     if not reg_athletes:
         return HttpResponse('No registered athletes for category "{}" in race: "{}"'.format(category_obj, race_obj))
 
-    return HttpResponse(reg_athletes)
+    time_records = TimeRecord.objects.filter(result_athlete__in=reg_athletes)
+
+    return HttpResponse(time_records)
+

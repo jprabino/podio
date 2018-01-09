@@ -23,12 +23,11 @@ class TimeRecord(models.Model):
     """
     TimeRecord for each race for a given athlete
     """
-    result_athlete = models.ForeignKey('Athlete', on_delete=models.CASCADE)
-    result_race = models.ForeignKey('Race', on_delete=models.CASCADE)
+    result_athlete = models.ForeignKey('Registered_Athlete', on_delete=models.CASCADE)
     time_record = models.DurationField(default=td(seconds=0))
 
     def __str__(self):
-         return 'Results for {}, at {}'.format(self.result_athlete, self.result_race)
+         return 'Results for {}, at {}'.format(self.result_athlete.athlete, self.result_athlete.race)
 
 class Category(models.Model):
     GENDER = (
@@ -68,7 +67,6 @@ class Race(models.Model):
     def get_results(self):
         if not self.ended:
             raise AttributeError('Race has not ended')
-
 
 
 class Registered_Athlete(models.Model):
