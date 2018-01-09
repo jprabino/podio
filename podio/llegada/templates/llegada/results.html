@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results for Race {{ race.name }}</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Position</th>
+            <th scope="col">Timer Record</th>
+        </tr>
+        {% for r in results %}
+        <tr>
+            <td> {{ r.result_athlete.athlete }} </td>
+            <td> {{ forloop.counter }} </td>
+            <td> {{ r.time_record }} </td>
+        </tr>
+            {% endfor %}
+
+    </table>
+
+</body>
+</html>
