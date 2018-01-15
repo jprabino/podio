@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if new_register %}
+    <title>Registrado en {{ race.name }}</title>
+    {% else  %}
+    <title> Error al registrarse a {{ race.name }}</title>
+    {% endif %}
+</head>
+<body>
+    {% if new_register %}
+    <h1>Nuevo atleta registrado en: {{ race.name }}</h1>
+    <p> Nombre: {{ reg_ath.athlete.first_name }} </p>
+    <p> Apellido: {{ reg_ath.athlete.last_name }} </p>
+    <p> Categoria: {{ reg_ath.category }} </p>
+    {% else %}
+    <h1>ERROR el atleta ya se encuentra registrado en: {{ race.name }}</h1>
+    <p> Nombre: {{ reg_ath.athlete.first_name }} </p>
+    <p> Apellido: {{ reg_ath.athlete.last_name }} </p>
+    <p> Categoria: {{ reg_ath.category }} </p>
+    {% endif %}
+</body>
+</html>

@@ -12,7 +12,6 @@ class Athlete(models.Model):
     )
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
-    time_records = models.ManyToManyField('TimeRecord')
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER, default='F')
 
@@ -23,11 +22,13 @@ class TimeRecord(models.Model):
     """
     TimeRecord for each race for a given athlete
     """
-    result_athlete = models.ForeignKey('Registered_Athlete', on_delete=models.CASCADE)
+    athlete = models.ForeignKey('Athlete', on_delete=models.CASCADE)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    race = models.ForeignKey('Race', on_delete=models.CASCADE)
     time_record = models.DurationField(default=td(seconds=0))
 
     def __str__(self):
-         return 'Results for {}, at {}'.format(self.result_athlete.athlete, self.result_athlete.race)
+         return 'Results for {}, at {}'.format(self.athlete, self.race)
 
 class Category(models.Model):
     GENDER = (
@@ -44,15 +45,27 @@ class Category(models.Model):
     def __str__(self):
         return "{} - {}".format(self.description, self.get_gender_display())
 
+class Registered_Athlete(models.Model):
+    """
+    Once an athlete is registered, it has a Registration Number and a Category
+    """
+    reg_id = models.AutoField(primary_key=True)
+    athlete = models.OneToOneField(to=Athlete, on_delete=models.CASCADE)
+    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return 'N° {} -  {}, {}'.format(self.reg_id, self.athlete.last_name,
+                                                           self.athlete.first_name)
 
 class Race(models.Model):
 
     name = models.CharField(max_length=200, unique=True)
     place = models.CharField(max_length=200)
-    date = models.DateField(default = timezone.datetime.today)
+    date = models.DateField(default=timezone.datetime.today)
     init_time = models.DateTimeField(null=True, blank=True)
     length = models.IntegerField(default=1000)
     available_categories = models.ManyToManyField(to=Category, )
+    reg_athletes = models.ManyToManyField(to=Registered_Athlete, )
     ended = models.BooleanField(default=False)
 
     def __str__(self):
@@ -69,15 +82,19 @@ class Race(models.Model):
             raise AttributeError('Race has not ended')
 
 
-class Registered_Athlete(models.Model):
-    """
-    Once an athlete is registered, it has a category assigned.
-    """
-    reg_id = models.IntegerField(primary_key=True)
-    athlete = models.OneToOneField(to=Athlete, on_delete=models.CASCADE)
-    race = models.ForeignKey(to=Race, on_delete=models.CASCADE)
-    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    def get_category(self, age, gender):
+        """
+        Returns the available category given the age and gender of the athlete
+        
+        :param age:  Integer, the age of the athlete
+        :param gender: Choice: M,F,C, O
+        :return: Category object, raise attribute error if no category is available.
+        """
 
-    def __str__(self):
-        return 'Inscripto: {}, {} en la Carrera {}'.format(self.athlete.last_name,
-                                                           self.athlete.first_name, self.race.name)
+
+        avc = self.available_categories.filter(gender=gender).order_by('high_age')
+
+        for cat in avc:
+            if age <= cat.high_age:
+                return cat
+        raise AttributeError("No Category for age: {}, {}".format(age, gender.get_gender_display()))
