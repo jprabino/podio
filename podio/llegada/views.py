@@ -12,7 +12,7 @@ from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
 
 def index(request):
 
-    return render(request, 'llegada/index.html')
+    return render(request, 'llegada/index.html', {'project_name': 'podio primer version'})
 
 def race(request, race_id):
 
@@ -26,6 +26,12 @@ def race(request, race_id):
     return render(request, 'llegada/race.html', {'race': race_obj, 'reg_athletes': reg_athletes})
 
 def results_summary_per_category(request, race_id):
+    """
+    
+    :param request: 
+    :param race_id: id for the race 
+    :return: 
+    """
     return
 
 def results_per_category(request, race_id, category_id):
@@ -39,14 +45,14 @@ def results_per_category(request, race_id, category_id):
     race_obj = get_object_or_404(Race, id=race_id)
     category_obj = get_object_or_404(Category, id=category_id)
 
-    reg_athletes = Registered_Athlete.objects.filter(race=race_obj, category=category_obj)
+    reg_athletes = Registered_Athlete.objects.filter(race=race_obj, category=category_obj).values('athlete')
 
     if not reg_athletes:
-        return HttpResponse('No registered athletes for category "{}" in race: "{}"'.format(category_obj, race_obj))
+        return render(request, 'llegada/results.html', {'results': [], 'category': category_obj})
 
-    time_records = TimeRecord.objects.filter(result_athlete__in=reg_athletes)
+    time_records = TimeRecord.objects.filter(athlete__in=reg_athletes)
 
-    return render(request, 'llegada/results.html',{'results':time_records, 'category': category_obj})
+    return render(request, 'llegada/results.html', {'results': time_records, 'category': category_obj})
 
 def register_new_athlete(request, athlete_id, race_id):
     """

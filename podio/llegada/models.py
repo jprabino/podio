@@ -30,6 +30,19 @@ class TimeRecord(models.Model):
     def __str__(self):
          return 'Results for {}, at {}'.format(self.athlete, self.race)
 
+
+class Result_Position(models.Model):
+    """
+    The positions an athlete hold give it's time record.
+    """
+    time_record = models.ForeignKey('TimeRecord', on_delete=models.CASCADE)
+    general_position = models.IntegerField()
+    category_position = models.IntegerField()
+
+    def __str__(self):
+         return 'Results for {}, General {}rd, Category {}rd'.format(self.time_record.athlete, self.general_position,
+                                                                     self.category_position)
+
 class Category(models.Model):
     GENDER = (
         ('M', 'Male'),

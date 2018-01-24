@@ -1,0 +1,26 @@
+{% extends 'llegada/base_template.html' %}
+{% block title %}
+<title> Perfil de {{athlete}}</title>
+{% endblock %}
+{% block content%}
+<h1>{{ athlete }}</h1>
+<h2>Resultados:</h2>
+        <table style="width:100%">
+            <tr>
+                <th scope="col">Carrera</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Timer Record</th>
+                <th scope="col">Posicion General</th>
+                <th scope="col">Posicion en la categoria</th>
+            </tr>
+            {% for r in results %}
+            <tr>
+                <td> {{ r.race }} </td>
+                <td> {{ r.category }} </td>
+                <td> {{ r.time_record }} </td>
+                <td> {{ r.general_position }} </td>
+                <td> {{ r.category_position }} </td>
+            </tr>
+            {% endfor %}
+        </table>
+{% endblock %}

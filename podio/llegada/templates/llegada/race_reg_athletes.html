@@ -1,0 +1,12 @@
+{% extends 'llegada/base_template.html' %}
+{% block title %}
+    <title>Carrera {{ race.name  }}</title>
+{% endblock %}
+{% block content %}
+    <h1> Nadadores Registrados en la carrera {{race.name}}</h1>
+    <ol>
+        {% for ath in reg_athletes %}
+        <li> {{ ath }}</li>
+        {% endfor %}
+    </ol>
+{% endblock %}
