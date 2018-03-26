@@ -2,8 +2,12 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from django.urls import reverse
+
+
 
 
 from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
@@ -12,7 +16,8 @@ from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
 
 def index(request):
 
-    return render(request, 'llegada/index.html', {'project_name': 'podio primer version'})
+    return render(request, 'llegada/index.html', {'project_name': 'podio primer version',
+                                                  'invalid_username': invalid_username})
 
 def race(request, race_id):
 
@@ -80,3 +85,13 @@ def register_new_athlete(request, athlete_id, race_id):
                                                              'reg_ath': registered_athlete, 'race':race})
     return render(request, 'llegada/new_register.html', {'new_register': True,
                                                          'reg_ath': registered_athlete, 'race':race})
+
+def user_login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        render(request, reverse('index'))
+    else:
+        redirect('index', invalid_username = True)
