@@ -4,10 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
-from django.urls import reverse
-
-
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
 
 
 from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
@@ -15,9 +13,21 @@ from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
 
 
 def index(request):
+    return render(request, 'llegada/index.html', {'project_name': 'podio primer version',})
 
-    return render(request, 'llegada/index.html', {'project_name': 'podio primer version',
-                                                  'invalid_username': invalid_username})
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'llegada/registration/signup.html', {'form': form})
 
 def race(request, race_id):
 
@@ -86,12 +96,12 @@ def register_new_athlete(request, athlete_id, race_id):
     return render(request, 'llegada/new_register.html', {'new_register': True,
                                                          'reg_ath': registered_athlete, 'race':race})
 
-def user_login(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        render(request, reverse('index'))
-    else:
-        redirect('index', invalid_username = True)
+# def user_login(request):
+#     username = request.POST['username']
+#     password = request.POST['password']
+#     user = authenticate(request, username=username, password=password)
+#     if user is not None:
+#         login(request, user)
+#         render(request, reverse('index'))
+#     else:
+#         render(request, reverse('index'))
