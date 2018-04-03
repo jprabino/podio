@@ -5,9 +5,8 @@ from django.db.utils import IntegrityError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
 
-
+from .forms import SignUpForm
 from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
 # Create your views here.
 
@@ -26,7 +25,7 @@ def signup(request):
             login(request, user)
             return redirect('home')
     else:
-        form = UserCreationForm()
+        form = SignUpForm()
     return render(request, 'llegada/registration/signup.html', {'form': form})
 
 def race(request, race_id):
