@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         llegada_views.activate, name='activate'),
     path('registration/login/', auth_views.LoginView.as_view(template_name='llegada/registration/login.html'), name='login'),
+    path('registration/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('registration/signup/', llegada_views.signup, name='signup'),
     path('registration/password_reset/', auth_views.PasswordResetView.as_view(template_name='llegada/registration/login.html'), name='password_reset')
 ]
