@@ -7,17 +7,8 @@ from django.utils import timezone
 # Create your models here.
 from datetime import timedelta as td
 
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email_confirmed = models.BooleanField(default=False)
-    email = models.EmailField()
-    
-@receiver(post_save, sender=User)
-def update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-    instance.profile.save()
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Athlete(models.Model):
@@ -26,13 +17,21 @@ class Athlete(models.Model):
         ('F', 'Female'),
         ('O', 'Other')
     )
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER, default='F')
 
     def __str__(self):
-        return '{}, {}'.format(self.last_name, self.first_name)
+        return self.user.get_full_name()
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Athlete.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
 
 class TimeRecord(models.Model):
     """

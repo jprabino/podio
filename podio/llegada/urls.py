@@ -2,8 +2,16 @@ from . import views as llegada_views
 from django.conf.urls import url
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from rest_framework import routers
+
+from . import views
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
+    path('rest', include(router.urls)),
     path('', llegada_views.index, name='index'),
     path('race/<int:race_id>', llegada_views.race, name='race_id'),
     path('race/<int:race_id>/register_athlete/<int:athlete_id>', llegada_views.register_new_athlete, name='register_athlete'),

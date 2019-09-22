@@ -11,9 +11,9 @@ from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 
-from .forms import SignUpForm
-from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
-from .tokens import account_activation_token
+from llegada.forms import SignUpForm
+from llegada.models import Registered_Athlete, Race, Category, TimeRecord, Athlete
+from llegada.tokens import account_activation_token
 # Create your views here.
 
 
@@ -138,3 +138,30 @@ def register_new_athlete(request, athlete_id, race_id):
 #         render(request, reverse('index'))
 #     else:
 #         render(request, reverse('index'))
+
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from .serializers import UserSerializer, GroupSerializer, AtheleteSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+class AthleteViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Athlete.objects.all()
+    serializer_class = AtheleteSerializer
