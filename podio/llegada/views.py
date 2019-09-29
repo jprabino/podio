@@ -14,6 +14,8 @@ from django.contrib.auth.models import User
 from llegada.forms import SignUpForm
 from llegada.models import Registered_Athlete, Race, Category, TimeRecord, Athlete
 from llegada.tokens import account_activation_token
+
+from rest_framework.decorators import api_view
 # Create your views here.
 
 
@@ -141,9 +143,11 @@ def register_new_athlete(request, athlete_id, race_id):
 
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
-from .serializers import UserSerializer, GroupSerializer, AtheleteSerializer
-
-
+from .serializers import UserSerializer, GroupSerializer, AtheleteSerializer, RaceSerializer, CategorySerializer
+from rest_framework.response import Response
+from rest_framework.request import Request
+from rest_framework import status
+from datetime import datetime as dt
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -165,3 +169,70 @@ class AthleteViewSet(viewsets.ModelViewSet):
     """
     queryset = Athlete.objects.all()
     serializer_class = AtheleteSerializer
+
+class RaceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Race.objects.all()
+    serializer_class = RaceSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+@api_view(['PUT'])
+def start_race(request, race_id):
+    """
+    set the starttime for the race
+    """
+    try:
+        race_obj = Race.objects.get(pk=race_id)
+    except Race.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if race_obj.init_time and request.data.get('override')!='true':
+        return Response({'error': 'Race {} already initiated'.format(race_obj)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'PUT':
+        race_serializer = RaceSerializer(race_obj, data={"init_time":dt.now().strftime("%Y-%m-%dT%H:%M:%S")}, partial=True)#YYYY-MM-DDThh:mm:ss.sTZD)})
+        if race_serializer.is_valid():
+            race_serializer.save()
+            return Response(race_serializer.data)
+
+        return Response(race_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def race_list(request):
+    """
+    Gets the list of races or creates a new one
+    """
+
+    if request.method == 'GET':
+        races = Race.objects.all()
+        race_serializer = RaceSerializer(races, many=True, context={'request':request})
+        return Response(race_serializer.data )
+    return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET','POST'])
+def race(request):
+
+    if request.method == 'GET':
+        try:
+            race_id = request.data['race_id']
+            race_obj = Race.objects.get(pk=race_id)
+            race_serializer = RaceSerializer(race_obj, context={'request':request})
+            return Response(race_serializer.data)
+        except Race.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        race_serializer = RaceSerializer(data=request.data, context={'request':request})
+        if race_serializer.is_valid():
+            race_serializer.save()
+            return Response(race_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(race_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

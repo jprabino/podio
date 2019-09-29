@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from llegada.models import Athlete
+from llegada.models import Athlete, Race, Category
 from rest_framework import serializers
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,3 +17,13 @@ class AtheleteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Athlete
         fields = ['first_name', 'last_name', 'email']
+
+class RaceSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Race
+        fields = ['name','place','date','available_categories', 'init_time', 'ended']
+
+class CategorySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['description','gender','low_age','high_age']
