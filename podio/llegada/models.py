@@ -18,17 +18,17 @@ class Athlete(models.Model):
         ('F', 'Female'),
         ('O', 'Other')
     )
-    user = models.OneToOneField(to=User, on_delete = models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(to=User, on_delete = models.CASCADE, null=False, blank=False)
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER, default='F')
 
     def __str__(self):
         return self.user.get_full_name()
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Athlete.objects.create(user=instance)
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Athlete.objects.create(user=instance)
 
 class TimeRecord(models.Model):
     """

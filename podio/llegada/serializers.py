@@ -13,10 +13,10 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
-class AtheleteSerializer(serializers.HyperlinkedModelSerializer):
+class AthleteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Athlete
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['user', 'age', 'gender',]
 
 class RaceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

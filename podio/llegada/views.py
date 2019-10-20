@@ -142,16 +142,21 @@ def register_new_athlete(request, athlete_id, race_id):
 #         render(request, reverse('index'))
 
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from .serializers import UserSerializer, GroupSerializer, AtheleteSerializer, RaceSerializer, CategorySerializer
+from rest_framework import viewsets,permissions
+from .serializers import UserSerializer, GroupSerializer, AthleteSerializer, RaceSerializer, CategorySerializer
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 from datetime import datetime as dt
+
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
 
@@ -159,7 +164,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
-    """
+    """    
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -168,12 +174,14 @@ class AthleteViewSet(viewsets.ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = Athlete.objects.all()
-    serializer_class = AtheleteSerializer
+    serializer_class = AthleteSerializer
 
 class RaceViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = Race.objects.all()
     serializer_class = RaceSerializer
 
@@ -181,6 +189,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
@@ -218,21 +228,35 @@ def race_list(request):
         return Response(race_serializer.data )
     return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET','POST'])
-def race(request):
+def getter_poster(request, obj_class, class_serializer):
+    """
+    Generic method to get / post single entity
+    """
 
     if request.method == 'GET':
         try:
-            race_id = request.data['race_id']
-            race_obj = Race.objects.get(pk=race_id)
-            race_serializer = RaceSerializer(race_obj, context={'request':request})
-            return Response(race_serializer.data)
-        except Race.DoesNotExist:
+            pk_id = request.data['id']
+            obj = obj_class.objects.get(pk=pk_id)
+            obj_serializer = class_serializer(obj, context={'request':request})
+            return Response(obj_serializer.data)
+        except obj_class.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
-        race_serializer = RaceSerializer(data=request.data, context={'request':request})
-        if race_serializer.is_valid():
-            race_serializer.save()
-            return Response(race_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(race_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        obj_serializer = class_serializer(data=request.data, context={'request':request})
+        if obj_serializer.is_valid():
+            obj_serializer.save()
+            return Response(obj_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(obj_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET','POST'])
+def race(request):
+
+    return getter_poster(request, Race, RaceSerializer)
+
+
+@api_view(['GET','POST'])
+def athlete(request):
+
+    return getter_poster(request, Athlete, AthleteSerializer)
+
