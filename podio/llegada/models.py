@@ -1,4 +1,4 @@
-
+from datetime import datetime as dt
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -7,18 +7,10 @@ from django.utils import timezone
 # Create your models here.
 from datetime import timedelta as td
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email_confirmed = models.BooleanField(default=False)
-    email = models.EmailField()
-    
-@receiver(post_save, sender=User)
-def update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-    instance.profile.save()
-
+# from django.contrib.gis.db import models as gis_models
 
 class Athlete(models.Model):
     GENDER = (
@@ -26,38 +18,29 @@ class Athlete(models.Model):
         ('F', 'Female'),
         ('O', 'Other')
     )
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
-    age = models.IntegerField()
+    user = models.OneToOneField(to=User, on_delete = models.CASCADE, null=False, blank=False)
+    age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER, default='F')
 
     def __str__(self):
-        return '{}, {}'.format(self.last_name, self.first_name)
+        return self.user.get_full_name()
+
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Athlete.objects.create(user=instance)
 
 class TimeRecord(models.Model):
     """
     TimeRecord for each race for a given athlete
     """
-    athlete = models.ForeignKey('Athlete', on_delete=models.CASCADE)
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
     race = models.ForeignKey('Race', on_delete=models.CASCADE)
     time_record = models.DurationField(default=td(seconds=0))
+    athlete = models.ForeignKey(to=Athlete, related_name='time_records', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-         return 'Results for {}, at {}'.format(self.athlete, self.race)
+         return 'Results for {}, at {}'.format(self.race, self.time_record)
 
-
-class Result_Position(models.Model):
-    """
-    The positions an athlete hold give it's time record.
-    """
-    time_record = models.ForeignKey('TimeRecord', on_delete=models.CASCADE)
-    general_position = models.IntegerField()
-    category_position = models.IntegerField()
-
-    def __str__(self):
-         return 'Results for {}, General {}rd, Category {}rd'.format(self.time_record.athlete, self.general_position,
-                                                                     self.category_position)
 
 class Category(models.Model):
     GENDER = (
@@ -90,6 +73,11 @@ class Race(models.Model):
 
     name = models.CharField(max_length=200, unique=True)
     place = models.CharField(max_length=200)
+    # The best would be to set a point field, but
+    # that need to change the DB to GIS
+    # place_lat_long = gis_models.PointField(help_text="Represented as (longitude, latitude)", null=True, blank=True)
+    place_lat = models.FloatField(null=True, blank=True)
+    place_long = models.FloatField(null=True, blank=True)
     date = models.DateField(default=timezone.datetime.today)
     init_time = models.DateTimeField(null=True, blank=True)
     length = models.IntegerField(default=1000)
@@ -100,6 +88,9 @@ class Race(models.Model):
     def __str__(self):
         return self.name
 
+    def start_race(self, timestamp = None):
+        self.init_time = dt.now() if not timestamp else timestamp
+        
     def end_race(self):
         self.ended = True
 
@@ -110,7 +101,6 @@ class Race(models.Model):
         if not self.ended:
             raise AttributeError('Race has not ended')
 
-
     def get_category(self, age, gender):
         """
         Returns the available category given the age and gender of the athlete
@@ -119,8 +109,6 @@ class Race(models.Model):
         :param gender: Choice: M,F,C, O
         :return: Category object, raise attribute error if no category is available.
         """
-
-
         avc = self.available_categories.filter(gender=gender).order_by('high_age')
 
         for cat in avc:

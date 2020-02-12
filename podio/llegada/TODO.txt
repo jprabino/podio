@@ -3,4 +3,3 @@ Next Steps:
     - Stop/Restart the clock?
 
 # Record the results of an specific swimmer
-

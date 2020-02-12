@@ -11,9 +11,11 @@ from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 
-from .forms import SignUpForm
-from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
-from .tokens import account_activation_token
+from podio-1.podio.llegada.forms import SignUpForm
+from podio.llegada.models import Registered_Athlete, Race, Category, TimeRecord, Athlete
+from podio.llegada.tokens import account_activation_token
+
+from rest_framework.decorators import api_view
 # Create your views here.
 
 
@@ -49,7 +51,7 @@ def activate(request, uidb64, token):
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+    except (TypeError, ValueError, OverflowError, ):
         user = None
 
     if user is not None and account_activation_token.check_token(user, token):
@@ -138,3 +140,123 @@ def register_new_athlete(request, athlete_id, race_id):
 #         render(request, reverse('index'))
 #     else:
 #         render(request, reverse('index'))
+
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets,permissions
+from .serializers import UserSerializer, GroupSerializer, AthleteSerializer, RaceSerializer, CategorySerializer
+from rest_framework.response import Response
+from rest_framework.request import Request
+from rest_framework import status
+from datetime import datetime as dt
+
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """    
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+class AthleteViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Athlete.objects.all()
+    serializer_class = AthleteSerializer
+
+class RaceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    queryset = Race.objects.all()
+    serializer_class = RaceSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+@api_view(['PUT'])
+def start_race(request, race_id):
+    """
+    set the starttime for the race
+    """
+    try:
+        race_obj = Race.objects.get(pk=race_id)
+    except Race.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if race_obj.init_time and request.data.get('override')!='true':
+        return Response({'error': 'Race {} already initiated'.format(race_obj)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'PUT':
+        race_serializer = RaceSerializer(race_obj, data={"init_time":dt.now().strftime("%Y-%m-%dT%H:%M:%S")}, partial=True)#YYYY-MM-DDThh:mm:ss.sTZD)})
+        if race_serializer.is_valid():
+            race_serializer.save()
+            return Response(race_serializer.data)
+
+        return Response(race_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def race_list(request):
+    """
+    Gets the list of races or creates a new one
+    """
+
+    if request.method == 'GET':
+        races = Race.objects.all()
+        race_serializer = RaceSerializer(races, many=True, context={'request':request})
+        return Response(race_serializer.data )
+    return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+def getter_poster(request, obj_class, class_serializer):
+    """
+    Generic method to get / post single entity
+    """
+
+    if request.method == 'GET':
+        try:
+            pk_id = request.data['id']
+            obj = obj_class.objects.get(pk=pk_id)
+            obj_serializer = class_serializer(obj, context={'request':request})
+            return Response(obj_serializer.data)
+        except obj_class.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        obj_serializer = class_serializer(data=request.data, context={'request':request})
+        if obj_serializer.is_valid():
+            obj_serializer.save()
+            return Response(obj_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(obj_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET','POST'])
+def race(request):
+
+    return getter_poster(request, Race, RaceSerializer)
+
+
+@api_view(['GET','POST'])
+def athlete(request):
+
+    return getter_poster(request, Athlete, AthleteSerializer)
+
