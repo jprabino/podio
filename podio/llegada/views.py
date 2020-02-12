@@ -22,7 +22,6 @@ from rest_framework.decorators import api_view
 def index(request):
     return render(request, 'llegada/index.html', {'project_name': 'podio primer version',})
 
-
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -64,16 +63,16 @@ def activate(request, uidb64, token):
         return render(request, 'llegada/registration/account_activation_invalid.html')
 
 
-def race(request, race_id):
+# def race(request, race_id):
 
-    race_obj = get_object_or_404(Race, id=race_id)
-    try:
-        reg_athletes = Registered_Athlete.objects.filter(race=race_obj)
+#     race_obj = get_object_or_404(Race, id=race_id)
+#     try:
+#         reg_athletes = Registered_Athlete.objects.filter(race=race_obj)
 
-    except ObjectDoesNotExist:
-        return HttpResponse('No Reg Athletes for race {}'.format(race_obj.name))
+#     except ObjectDoesNotExist:
+#         return HttpResponse('No Reg Athletes for race {}'.format(race_obj.name))
 
-    return render(request, 'llegada/race.html', {'race': race_obj, 'reg_athletes': reg_athletes})
+#     return render(request, 'llegada/race.html', {'race': race_obj, 'reg_athletes': reg_athletes})
 
 def results_summary_per_category(request, race_id):
     """
@@ -143,6 +142,7 @@ def register_new_athlete(request, athlete_id, race_id):
 
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets,permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from .serializers import UserSerializer, GroupSerializer, AthleteSerializer, RaceSerializer, CategorySerializer
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -159,7 +159,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-
 
 class GroupViewSet(viewsets.ModelViewSet):
     """
@@ -181,6 +180,7 @@ class RaceViewSet(viewsets.ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
 
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = Race.objects.all()
     serializer_class = RaceSerializer

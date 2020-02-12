@@ -20,6 +20,7 @@ urlpatterns = [
     path('race/list', views.race_list),
     path('race', views.race),
     path('athlete', views.athlete),
+    path('signup', views.signup),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
 
