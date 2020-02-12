@@ -11,9 +11,9 @@ from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 
-from podio-1.podio.llegada.forms import SignUpForm
-from podio.llegada.models import Registered_Athlete, Race, Category, TimeRecord, Athlete
-from podio.llegada.tokens import account_activation_token
+from .forms import SignUpForm
+from .models import Registered_Athlete, Race, Category, TimeRecord, Athlete
+from .tokens import account_activation_token
 
 from rest_framework.decorators import api_view
 # Create your views here.
