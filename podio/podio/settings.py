@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'llegada.apps.LlegadaConfig',
-
     'rest_framework.authtoken',
     'rest_framework',
     'oauth2_provider',
@@ -133,10 +132,7 @@ OAUTH2_PROVIDER = {
 }
 REST_FRAMEWORK = {    
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
