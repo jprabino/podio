@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'llegada.apps.LlegadaConfig',
     'rest_framework.authtoken',
     'rest_framework',
-    'oauth2_provider',
+    'rest_auth', 
 ]
 
 MIDDLEWARE = [

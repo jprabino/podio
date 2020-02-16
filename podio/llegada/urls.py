@@ -18,12 +18,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('race/start/<int:race_id>', views.start_race),
     path('race/list', views.race_list),
-    path('race', views.race),
-    path('athlete', views.athlete),
-    path('api/login', views.login),
-    path('api/sampleapi', views.sample_api),
-    # path('signup', views.signup),
-    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('rest-auth/', include('rest_auth.urls')),
 ]
 
 # urlpatterns = format_suffix_patterns(urlpatterns)

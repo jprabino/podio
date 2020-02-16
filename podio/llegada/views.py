@@ -263,7 +263,7 @@ def getter_poster(request, obj_class, class_serializer):
     """
     Generic method to get / post single entity
     """
-
+    import pdb;pdb.set_trace()
     if request.method == 'GET':
         try:
             pk_id = request.data['id']
@@ -282,7 +282,7 @@ def getter_poster(request, obj_class, class_serializer):
 
 @api_view(['GET','POST'])
 def race(request):
-
+    print(request.user)
     return getter_poster(request, Race, RaceSerializer)
 
 
